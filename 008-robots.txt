@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tejas-191.github.io/sitemap.xml
