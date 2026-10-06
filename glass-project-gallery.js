@@ -58,14 +58,14 @@ function buildStory(image){
 function layoutStory(){
  const width=$('stage').clientWidth,height=$('stage').clientHeight;let offset=0,cursor=0;
  storyStops=Array.from($('story').children).map((page,i)=>{
-  const w=width;page.style.flexBasis=w+'px';
+  const ratio=Number(page.dataset.ratio),w=ratio>0?Math.min(width,height*ratio):width;page.style.flexBasis=w+'px';
   const stop={page,index:i,hold:page.dataset.film?5:0,offset,width:w};offset+=w;return stop;
  });
  const maxOffset=Math.max(0,offset-width);
  storyStops.forEach((stop,i)=>{stop.position=Math.min(stop.offset,maxOffset);const next=storyStops[i+1];stop.travel=((next?Math.min(next.offset,maxOffset):maxOffset)-stop.position)/width;stop.start=cursor;cursor+=stop.hold+stop.travel;});storyLength=cursor;
 }
 let sheetSnapTimer;
-function settleSheet(){clearTimeout(sheetSnapTimer);sheetSnapTimer=setTimeout(()=>{if(mode==='project'&&storyLength>0&&!storyStops.some(stop=>stop.hold))projectTarget=Math.round(projectTarget*storyLength)/storyLength;},260);}
+function settleSheet(){clearTimeout(sheetSnapTimer);sheetSnapTimer=setTimeout(()=>{if(mode==='project'&&storyLength>0&&!storyStops.some(stop=>stop.hold)){const at=projectTarget*storyLength,nearest=storyStops.reduce((best,stop)=>Math.abs(stop.start-at)<Math.abs(best.start-at)?stop:best,storyStops[0]);projectTarget=nearest.start/storyLength;}},260);}
 function panStory(){
  const t=projectProgress*storyLength;let active=storyStops[0];
  for(const stop of storyStops){if(t>=stop.start)active=stop;}
