@@ -78,9 +78,28 @@ let returnScrollUntil=0;
 function back(){returnScrollUntil=performance.now()+650;mode='gallery';document.body.classList.remove('project-open');resize();playing=false;glass.visible=true;$('project').hidden=true;$('play').textContent='Play sequence';target=progress;gallery();$('enter').focus();}
 document.querySelector('.heading').addEventListener('click',openProject);document.querySelector('.heading').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openProject();}});$('enter').addEventListener('click',openProject);const raycaster=new THREE.Raycaster();renderer.domElement.addEventListener('click',event=>{if(mode!=='gallery')return;const rect=renderer.domElement.getBoundingClientRect();raycaster.setFromCamera(new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),camera);if(raycaster.intersectObject(pane,false).length)openProject();});
 $('stage').addEventListener('pointermove',event=>{if(mode!=='gallery'||event.pointerType==='touch')return;const rect=$('stage').getBoundingClientRect();mouse.tx=Math.max(-1,Math.min(1,(event.clientX-rect.left-rect.width*.5)/(rect.width*.3)));mouse.ty=Math.max(-1,Math.min(1,(event.clientY-rect.top-rect.height*.52)/(rect.height*.3)));});$('stage').addEventListener('pointerleave',()=>{mouse.tx=mouse.ty=0;});
-$('stage').addEventListener('wheel',event=>{if(performance.now()<returnScrollUntil){event.preventDefault();return;}if(mode==='opening'){event.preventDefault();return;}const amount=Math.abs(event.deltaX)>Math.abs(event.deltaY)?event.deltaX:event.deltaY;if(mode==='project'&&amount<0&&projectTarget===0&&projectProgress<.002){event.preventDefault();back();return;}const value=mode==='project'?projectTarget:target;if(amount>0&&value<1||amount<0&&value>0){event.preventDefault();playing=false;$('play').textContent=mode==='project'?'Pan project':'Play sequence';if(mode==='project')projectTarget=clamp(projectTarget+amount/Math.max(2200,storyLength*900));else target=clamp(target+amount/(target<.27?11600:1800+ids.length*400));}},{passive:false});
+// Stop at the completed intro and the first landed cube; discard gesture momentum.
+function createScrollStops(){
+ const stops=[.25,.36],quietMs=320,holdMs=450;let lock=null,lastInput=-Infinity;
+ return {
+  beginGesture(){lastInput=-Infinity;},
+  advance(value,delta,now,rendered){
+   const quiet=now-lastInput>=quietMs;lastInput=now;
+   if(lock){
+    if(delta<0){lock=null;}
+    else if(!quiet||now-lock.since<holdMs||Math.abs(rendered-lock.at)>.001)return lock.at;
+    else lock=null;
+   }
+   const next=clamp(value+delta);
+   if(delta>0){const stop=stops.find(point=>value<point&&next>=point);if(stop!==undefined){lock={at:stop,since:now};return stop;}}
+   return next;
+  }
+ };
+}
+const scrollStops=createScrollStops();
+$('stage').addEventListener('wheel',event=>{if(performance.now()<returnScrollUntil){event.preventDefault();return;}if(mode==='opening'){event.preventDefault();return;}const amount=Math.abs(event.deltaX)>Math.abs(event.deltaY)?event.deltaX:event.deltaY;if(mode==='project'&&amount<0&&projectTarget===0&&projectProgress<.002){event.preventDefault();back();return;}const value=mode==='project'?projectTarget:target;if(amount>0&&value<1||amount<0&&value>0){event.preventDefault();playing=false;$('play').textContent=mode==='project'?'Pan project':'Play sequence';if(mode==='project')projectTarget=clamp(projectTarget+amount/Math.max(2200,storyLength*900));else target=scrollStops.advance(target,amount/(target<.27?11600:1800+ids.length*400),performance.now(),progress);}},{passive:false});
 $('progress').addEventListener('input',()=>{playing=false;const value=$('progress').value/1000;if(mode==='project')projectProgress=projectTarget=value;else progress=target=value;});$('play').addEventListener('click',()=>{playing=!playing;if(playing){if(mode==='project'&&projectProgress>=.999)projectProgress=projectTarget=0;if(mode==='gallery'&&progress>=.999)progress=target=0;}$('play').textContent=playing?'Pause':mode==='project'?'Pan project':'Play sequence';});$('home').addEventListener('click',()=>{if(mode!=='gallery')back();progress=target=0;playing=true;$('play').textContent='Pause';});
-let touchY=null;$('stage').addEventListener('touchstart',e=>{touchY=e.touches[0].clientY;},{passive:true});$('stage').addEventListener('touchmove',e=>{if(touchY===null||mode==='opening')return;if(performance.now()<returnScrollUntil){touchY=e.touches[0].clientY;e.preventDefault();return;}const dy=touchY-e.touches[0].clientY;touchY=e.touches[0].clientY;e.preventDefault();playing=false;if(mode==='project'&&dy<0&&projectTarget===0&&projectProgress<.002){back();return;}if(mode==='project')projectTarget=clamp(projectTarget+dy/1600);else target=clamp(target+dy/(target<.27?4000:2000));},{passive:false});
+let touchY=null;$('stage').addEventListener('touchstart',e=>{touchY=e.touches[0].clientY;scrollStops.beginGesture();},{passive:true});$('stage').addEventListener('touchmove',e=>{if(touchY===null||mode==='opening')return;if(performance.now()<returnScrollUntil){touchY=e.touches[0].clientY;e.preventDefault();return;}const dy=touchY-e.touches[0].clientY;touchY=e.touches[0].clientY;e.preventDefault();playing=false;if(mode==='project'&&dy<0&&projectTarget===0&&projectProgress<.002){back();return;}if(mode==='project')projectTarget=clamp(projectTarget+dy/1600);else target=scrollStops.advance(target,dy/(target<.27?4000:2000),performance.now(),progress);},{passive:false});
 function resize(){lastFrameKey=null;const stage=$('stage');camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix();renderer.setSize(stage.clientWidth,stage.clientHeight);if(mode==='project')layoutStory();}window.addEventListener('resize',resize);resize();
 renderer.setAnimationLoop(time=>{if(document.hidden){previous=0;return;}
  const key=[mode,target.toFixed(5),progress.toFixed(5),projectTarget.toFixed(5),projectProgress.toFixed(5),mouse.x.toFixed(4),mouse.y.toFixed(4),mouse.tx,mouse.ty,visibleId,cache.size,camera.aspect].join('|');
@@ -89,3 +108,4 @@ renderer.setAnimationLoop(time=>{if(document.hidden){previous=0;return;}
 
 
 }catch(error){loading.hidden=false;loading.textContent='Preview error: '+error.message;console.error(error);window.galleryState={status:'error',message:error.message};}})();
+
