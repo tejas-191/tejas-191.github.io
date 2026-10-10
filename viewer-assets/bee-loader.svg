@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+<title>Flying bee</title>
+<style>.bee{animation:hover 1.2s ease-in-out infinite alternate}.wing{transform-origin:62px 59px;animation:flap .14s ease-in-out infinite alternate}.rear{animation-delay:-.07s}@keyframes flap{from{transform:rotate(-18deg) scaleY(.55)}to{transform:rotate(16deg) scaleY(1)}}@keyframes hover{to{transform:translateY(-4px)}}@media(prefers-reduced-motion:reduce){.bee,.wing{animation:none}}</style>
+<g class="bee" stroke="#292b27" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+<path class="wing rear" d="M62 59C35 58 29 26 44 26C59 26 68 46 62 59Z" fill="#e8eeeb"/>
+<path class="wing" d="M62 59C57 38 66 16 79 22C94 30 80 52 62 59Z" fill="#f5f7f2"/>
+<path d="M30 69L21 73L31 78" fill="#292b27"/>
+<ellipse cx="49" cy="69" rx="24" ry="17" fill="#ddb24e"/>
+<path d="M39 54C44 62 44 76 39 84M52 52C58 63 58 76 52 86" stroke-width="7"/>
+<ellipse cx="73" cy="65" rx="14" ry="15" fill="#292b27"/>
+<path d="M76 51L77 43L83 39M84 55L91 47L96 48"/>
+<path d="M58 83L63 90L70 90M45 84L47 92L53 93"/>
+<circle cx="79" cy="61" r="2" fill="#f5f3e8" stroke="none"/>
+</g></svg>
+
