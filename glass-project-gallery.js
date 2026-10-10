@@ -53,6 +53,7 @@ function buildStory(image){
  if(info){const title=$('project-name').parentElement;title.querySelector('small').textContent=info.credits==='ACADEMIC'?'ACADEMIC PROJECT':info.credits==='THESIS'?'THESIS':'ARCHITECTURAL PROJECT';
  for(const [key,tag] of [['subtitle','em'],['achievements','p'],['credits','p']]){if(!info[key])continue;const el=document.createElement(tag);el.className='project-'+key;el.textContent=info[key];title.insertBefore(el,title.lastElementChild);}}
 
+ const returnButton=document.createElement('button');returnButton.className='back-to-projects';returnButton.textContent='Back to projects ↗';returnButton.addEventListener('click',event=>{event.stopPropagation();back();});$('story').lastElementChild.append(returnButton);
  layoutStory();
 }
 function layoutStory(){
