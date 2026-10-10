@@ -1,0 +1,7 @@
+.bee-indicator,#loading:not([data-error]){--bee-period:.55s;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:110px;height:88px;background:transparent url('viewer-assets/bee-body.webp') center/100% 100% no-repeat;padding:0;box-shadow:none;pointer-events:none;z-index:8;display:block}
+.bee-indicator::before,.bee-indicator::after,#loading:not([data-error])::before,#loading:not([data-error])::after{content:'';position:absolute;inset:0;display:block;width:100%;height:100%;background:url('viewer-assets/bee-wings.webp') center/100% 100% no-repeat;animation:bee-left var(--bee-period) ease-in-out infinite alternate;transform-origin:44% 42%;clip-path:inset(0 50% 0 0)}
+.bee-indicator::after,#loading:not([data-error])::after{clip-path:inset(0 0 0 50%);transform-origin:56% 42%;animation-name:bee-right}
+@keyframes bee-left{from{transform:scaleX(.35) rotate(-14deg)}to{transform:scaleX(1) rotate(5deg)}}@keyframes bee-right{from{transform:scaleX(.35) rotate(14deg)}to{transform:scaleX(1) rotate(-5deg)}}
+#loading[hidden]{display:none!important}#loading[hidden]::before,#loading[hidden]::after{animation:none}#intro>.bee-indicator{top:auto;bottom:17%;z-index:5}.media-load-error{position:absolute;inset:45% 0 auto;text-align:center;font:12px Montserrat,Arial,sans-serif;color:#60665b}
+@media(prefers-reduced-motion:reduce){.bee-indicator::before,.bee-indicator::after,#loading:not([data-error])::before,#loading:not([data-error])::after{animation:none}}
+

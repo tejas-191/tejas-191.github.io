@@ -16,7 +16,7 @@
 
  function resize(){w=film.clientWidth;h=film.clientHeight;dpr=Math.min(window.devicePixelRatio||1,compact?1.25:1.5);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);paint();}
  new ResizeObserver(resize).observe(film);
- source.addEventListener('load',()=>{ready=true;resize();draw(p)});if(source.complete&&source.naturalWidth){ready=true;resize();}
+ let introBee;if(!source.complete){window.BeeLoading.begin('intro');introBee=window.BeeLoading.mount(document.getElementById('intro'),'intro');}const clearBee=()=>{introBee?.remove();window.BeeLoading.end('intro');};source.addEventListener('error',clearBee,{once:true});source.addEventListener('load',()=>{clearBee();ready=true;resize();draw(p)});if(source.complete&&source.naturalWidth){ready=true;resize();}
  let rendered=-1;window.paintPortfolioIntro=value=>{value=clamp(value);if(value!==rendered){rendered=value;draw(value)}};
  window.paintPortfolioIntro(0);
 })();
