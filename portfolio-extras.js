@@ -1,9 +1,9 @@
 (()=>{
  const stage=document.getElementById('stage');if(!stage)return;
- const nav=document.createElement('nav');nav.id='portfolio-nav';nav.setAttribute('aria-label','Main navigation');nav.innerHTML='<a href="#projects">Projects</a><a href="about.html">About</a><a href="contact.html">Contact</a>';stage.append(nav);
+ const nav=document.createElement('nav');nav.id='portfolio-nav';nav.setAttribute('aria-label','Main navigation');nav.innerHTML='<a href="#projects">Projects</a><a href="about.html?v=phone-3">About</a><a href="contact.html?v=phone-3">Contact</a>';stage.append(nav);
  const jump=document.createElement('a');jump.id='projects-down';jump.href='#projects';jump.textContent='Explore projects ↓';stage.append(jump);
  const hive=document.createElement('button');hive.id='hive-egg';hive.setAttribute('aria-label','Beehive');hive.hidden=true;stage.append(hive);
- const chair=document.createElement('a');chair.id='chair-about';chair.href='about.html';chair.setAttribute('aria-label','About Tejas');chair.hidden=true;stage.append(chair);
+ const chair=document.createElement('a');chair.id='chair-about';chair.href='about.html?v=phone-3';chair.setAttribute('aria-label','About Tejas');chair.hidden=true;stage.append(chair);
  const canvas=document.createElement('canvas');canvas.id='bee-swarm';canvas.setAttribute('aria-hidden','true');canvas.hidden=true;stage.append(canvas);const ctx=canvas.getContext('2d'),sheet=new Image();let promise=null,running=false,origin={x:0,y:0};
  function load(){if(!promise){sheet.src='viewer-assets/bee-sprites.webp';promise=sheet.decode().catch(()=>{promise=null;});}return promise;}
  function hotspots(){const w=stage.clientWidth,h=stage.clientHeight,s=Math.max(w,h),left=(w-s)/2,top=(h-s)/2;origin={x:left+s*.075,y:top+s*.385};for(const [el,x,y,sw,sh] of [[hive,.036,.34,.09,.105],[chair,.023,.52,.19,.13]]){el.style.left=(left+x*s)+'px';el.style.top=(top+y*s)+'px';el.style.width=sw*s+'px';el.style.height=sh*s+'px';}}
