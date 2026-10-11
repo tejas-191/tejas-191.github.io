@@ -2,13 +2,16 @@
 'use strict';
 const connection=navigator.connection, local=['localhost','127.0.0.1'].includes(location.hostname);
 function fastEnough(){
- if(connection?.saveData || (connection?.effectiveType && connection.effectiveType!=='4g') || (connection?.downlink!=null && connection.downlink<3) || (connection?.rtt>250)) return false;
- if(connection?.effectiveType==='4g' && connection.downlink>=3) return true;
- return performance.getEntriesByType('resource').some(r=>r.transferSize>100000 && r.responseEnd>r.responseStart && r.transferSize/(r.responseEnd-r.responseStart)>500);
+ if(connection?.saveData || (connection?.effectiveType && ['slow-2g','2g','3g'].includes(connection.effectiveType))) return false;
+ const resources=performance.getEntriesByType('resource').filter(r=>r.name.startsWith(location.origin)&&r.decodedBodySize>100000);
+ const observedFast=resources.some(r=>r.duration>0 && ((r.transferSize>0 && r.transferSize/r.duration>180) || (r.transferSize===0 && r.duration<150)));
+ if(observedFast)return true;
+ return connection?.effectiveType==='4g' && connection.downlink>=1.5 && (!connection.rtt || connection.rtt<400);
 }
-document.documentElement.dataset.ambientBee='checking'; if(matchMedia('(prefers-reduced-motion: reduce)').matches || !fastEnough()) {document.documentElement.dataset.ambientBee='skipped';return;}
+document.documentElement.dataset.ambientBee='waiting';
+if(matchMedia('(prefers-reduced-motion: reduce)').matches || connection?.saveData){document.documentElement.dataset.ambientBee='skipped';return;}
 async function start(){
- document.documentElement.dataset.ambientBee="starting"; if(!fastEnough() || !window.THREE) return;
+ document.documentElement.dataset.ambientBee="starting"; if(!fastEnough() || !window.THREE){document.documentElement.dataset.ambientBee='skipped-connection';return;}
  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),9000);
  const stopDownload=()=>{if(!fastEnough())controller.abort();};connection?.addEventListener('change',stopDownload);
  let gltf;
