@@ -9,7 +9,8 @@ function fastEnough(){
  return connection?.effectiveType==='4g' && connection.downlink>=1.5 && (!connection.rtt || connection.rtt<400);
 }
 document.documentElement.dataset.ambientBee='waiting';
-if(matchMedia('(prefers-reduced-motion: reduce)').matches || connection?.saveData){document.documentElement.dataset.ambientBee='skipped';return;}
+const gentleMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(connection?.saveData){document.documentElement.dataset.ambientBee='skipped-data-saver';return;}
 async function start(){
  document.documentElement.dataset.ambientBee="starting"; if(!fastEnough() || !window.THREE){document.documentElement.dataset.ambientBee='skipped-connection';return;}
  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),9000);
@@ -21,7 +22,7 @@ async function start(){
  const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(75,75);renderer.outputEncoding=THREE.sRGBEncoding;
  renderer.setClearColor(0x000000,0);renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.3;
- const canvas=renderer.domElement;canvas.id='ambient-bee';canvas.setAttribute('aria-hidden','true');canvas.style.cssText='position:fixed;left:0;top:0;width:75px;height:75px;pointer-events:none;z-index:20;opacity:0;transition:opacity .8s;';document.body.append(canvas);
+ const canvas=renderer.domElement;canvas.id='ambient-bee';canvas.setAttribute('aria-hidden','true');canvas.style.cssText='position:fixed;left:0;top:0;width:75px;height:75px;pointer-events:none;z-index:20;opacity:0;transition:opacity .8s;';document.body.append(canvas);document.documentElement.dataset.ambientBee='ready';
  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,1,.01,100);camera.position.set(2,3.4,4.5);camera.lookAt(0,0,0);
  scene.add(new THREE.HemisphereLight(0xffffff,0x65573b,1.7));const light=new THREE.DirectionalLight(0xffeed6,2.3);light.position.set(3,5,5);scene.add(light);
  const model=gltf.scene,bounds=new THREE.Box3().setFromObject(model),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
@@ -57,7 +58,7 @@ async function start(){
    duration=behavior==='reading'?1300:2000;bend=behavior==='cube'?25:50;
    canvas.dataset.behavior=behavior;
   }
-  const t=Math.min(1,(now-began)/duration);
+  const t=Math.min(1,(now-began)/(duration*(gentleMotion?2.5:1)));
   if(phase==='flight'){
    const e=t*t*(3-2*t);point.x=from.x+(to.x-from.x)*e;point.y=from.y+(to.y-from.y)*e-Math.sin(Math.PI*t)*bend;
    pivot.rotation.y+=( (to.x>from.x?1.1:-1.1)-pivot.rotation.y)*.07;pivot.rotation.z=Math.sin(t*Math.PI)*.16*(to.x>from.x?-1:1);
